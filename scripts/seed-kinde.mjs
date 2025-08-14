@@ -67,10 +67,9 @@ function client(token) {
 // ---- Ensure helpers (shape them to the Management API you have) ----
 async function createFeatureFlag(api, flag) {
   try {
-    await api.call("GET", `/feature_flags/${flag.key}`)
-    await api.call("PATCH", `/feature_flags/${flag.key}`, flag)
-  } catch {
     await api.call("POST", `/feature_flags`, flag)
+  } catch (err) {
+    console.log("Feature flags came with an error", err)
   }
 }
 
