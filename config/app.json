@@ -1,0 +1,8 @@
+{
+  "application": {
+    "name": "Sample NextJS App",
+    "key": "nextjs-backend",
+    "redirectUris": ["http://localhost:3000/api/auth/kinde_callback"],
+    "logoutUris": ["http://localhost:3000/"]
+  }
+}
