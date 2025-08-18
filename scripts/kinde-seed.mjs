@@ -168,29 +168,54 @@ async function createApiAndScopes(api, { name, audience, scopes = [] }) {
 }
 
 async function createRoleAndPermissions(api, role) {
+  console.log("Creating roles and permissions...")
+
+  let roleObj = null
+
   try {
-    const roleObj = await api.call("POST", `/roles`, {
+    roleObj = await api.call("POST", `/roles`, {
       key: role.key,
       name: role.name,
     })
-    const roleId = roleObj.role.id
-  } catch {}
+    roleObj.name = role.name
+    console.log("Created role:", role.name)
+  } catch {
+    console.log("Error creating role:", role.name)
+    console.log("Exiting.")
 
-  try {
-    for (const p of role.permissions) {
-      const permObj = await api.call("POST", `/permissions`, {
+    return
+  }
+
+  const permObjs = []
+  let permObj = null
+
+  for (const p of role.permissions) {
+    try {
+      permObj = await api.call("POST", `/permissions`, {
         key: p.key,
         name: p.name,
       })
-      console.log("Permission object", permObj)
-      // Check this part later
-      // const { permission } = permObj
-      // await api.call("PATCH", `/roles/${roleId}/permissions`, {
-      //   permissions: [{ id: permission.id }],
-      // })
+      permObj.name = p.name
+      console.log("Permission created:", p.name)
+      permObjs.push(permObj)
+    } catch {
+      console.log("Error creating the permission:", p.name)
     }
-  } catch {}
-  console.log("Created the roles and permissions")
+  }
+
+  for (const perm of permObjs) {
+    const { id } = perm.permission
+    try {
+      await api.call("PATCH", `/roles/${roleObj.role.id}/permissions`, {
+        permissions: [{ id }],
+      })
+      console.log(
+        `Added the permission "${perm.name}" to the role ${roleObj.name}`
+      )
+    } catch {
+      console.log("Error creating the permission")
+    }
+  }
 }
 
 // ---- Run for this env ----
@@ -226,6 +251,8 @@ const api = client(token)
 // ])
 
 // Test and nail each endpoint one at a time.
-await Promise.all([...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a))])
+await Promise.all([
+  ...(cfg.roles ?? []).map((r) => createRoleAndPermissions(api, r)),
+])
 
 console.log("Kinde seed complete")
