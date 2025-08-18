@@ -221,19 +221,17 @@ async function createRoleAndPermissions(api, role) {
 const token = await getToken()
 const api = client(token)
 
+// Destructuring the values
+const { name, type, redirectUrls, logoutUrls } = cfg.application
+const { envVars, apis, featureFlags, roles } = cfg
+
 // Execute the script
 await Promise.all([
-  createApplicationWithUrls(
-    api,
-    cfg.application.name,
-    cfg.application.type,
-    cfg.application.redirectUrls,
-    cfg.application.logoutUrls
-  ),
-  ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
-  ...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a)),
-  ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
-  ...(cfg.roles ?? []).map((r) => createRoleAndPermissions(api, r)),
+  createApplicationWithUrls(api, name, type, redirectUrls, logoutUrls),
+  ...(envVars ?? []).map((v) => createEnvVariable(api, v)),
+  ...(apis ?? []).map((a) => createApiAndScopes(api, a)),
+  ...(featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
+  ...(roles ?? []).map((r) => createRoleAndPermissions(api, r)),
 ])
 
 console.log("Kinde seed complete")
