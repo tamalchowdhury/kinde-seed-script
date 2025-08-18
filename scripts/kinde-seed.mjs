@@ -80,7 +80,7 @@ async function createApplicationWithUrls(
       name,
       type,
     })
-  } catch (error) {
+  } catch {
     console.log("Cannot create an application, exiting the function")
     return
   }
@@ -105,6 +105,20 @@ async function createApplicationWithUrls(
 
   console.log("Created a Kinde application with id", id)
   if (errors.length) console.log("with some errors", errors)
+}
+
+async function createEnvVariable(api, item) {
+  try {
+    const { key, value, sensitive = false } = item
+    await api.call("POST", `/environment_variables`, {
+      key,
+      value,
+      is_secret: sensitive,
+    })
+    console.log("Created environment variable", item.key)
+  } catch {
+    console.log("Could not create env variable", item.key)
+  }
 }
 
 // ---- Ensure helpers (shape them to the Management API you have) ----
@@ -153,22 +167,6 @@ async function createRoleAndPermissions(api, role) {
   console.log("Created the roles and permissions")
 }
 
-async function createEnvVars(api, items) {
-  // need some work to do here
-  try {
-    for (const { key, value, sensitive = false } of items) {
-      await api.call("POST", `/environment_variables`, {
-        key,
-        value,
-        is_secret: sensitive,
-      })
-    }
-    console.log("Created environment variables")
-  } catch (err) {
-    console.log("Could not create env variables")
-  }
-}
-
 // ---- Run for this env ----
 const token = await getToken()
 const api = client(token)
@@ -195,7 +193,7 @@ const api = client(token)
 //     cfg.application.redirectUrls,
 //     cfg.application.logoutUrls
 //   ),
-//   createEnvVars(api, cfg.envVars ?? []),
+//   ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
 //   ...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a)),
 //   ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
 //   ...(cfg.roles ?? []).map((r) => createRoleAndPermissions(api, r)),
@@ -203,7 +201,7 @@ const api = client(token)
 
 // Test and nail each endpoint one at a time.
 await Promise.all([
-  
+  ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
 ])
 
 console.log("Kinde seed complete")
