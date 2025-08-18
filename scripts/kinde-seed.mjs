@@ -1,4 +1,3 @@
-// Node 18+ (global fetch)
 import fs from "node:fs/promises"
 
 const {
@@ -218,40 +217,22 @@ async function createRoleAndPermissions(api, role) {
   }
 }
 
-// ---- Run for this env ----
+// Token and create the client
 const token = await getToken()
 const api = client(token)
 
-// await Promise.all([
-//   ...(cfg.apis ?? []).map((a) => ensureApiAndScopes(api, a)),
-//   ...(cfg.featureFlags ?? []).map((f) => ensureFeatureFlag(api, f)),
-//   ...(cfg.roles ?? []).map((r) => ensureRoleAndPermissions(api, r)),
-//   ensureAppRedirects(
-//     api,
-//     cfg.application.name,
-//     cfg.application.type,
-//     cfg.application.redirectUris,
-//     cfg.application.logoutUris
-//   ),
-//   ensureEnvVars(api, cfg.envVars ?? []),
-// ])
-
-// await Promise.all([
-//   createApplicationWithUrls(
-//     api,
-//     cfg.application.name,
-//     cfg.application.type,
-//     cfg.application.redirectUrls,
-//     cfg.application.logoutUrls
-//   ),
-//   ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
-//   ...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a)),
-//   ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
-//   ...(cfg.roles ?? []).map((r) => createRoleAndPermissions(api, r)),
-// ])
-
-// Test and nail each endpoint one at a time.
+// Execute the script
 await Promise.all([
+  createApplicationWithUrls(
+    api,
+    cfg.application.name,
+    cfg.application.type,
+    cfg.application.redirectUrls,
+    cfg.application.logoutUrls
+  ),
+  ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
+  ...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a)),
+  ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
   ...(cfg.roles ?? []).map((r) => createRoleAndPermissions(api, r)),
 ])
 

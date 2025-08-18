@@ -9,6 +9,7 @@
     {
       "key": "orders-api",
       "name": "Orders API",
+      "audience": "orders",
       "scopes": ["orders:read", "orders:write"]
     }
   ],
@@ -27,7 +28,8 @@
       "name": "New Checkout",
       "key": "new_checkout",
       "type": "bool",
-      "default_value": "true"
+      "allow_override_level": "env",
+      "default_value": true
     }
   ],
   "envVars": [
