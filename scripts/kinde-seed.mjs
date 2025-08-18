@@ -140,30 +140,30 @@ async function createFeatureFlag(api, flag) {
 async function createApiAndScopes(api, { name, audience, scopes = [] }) {
   console.log("Creating API and Scopes...")
 
-  let apiObj = {}
+  let apiObj = null
 
   try {
     apiObj = await api.call("POST", `/apis`, { name, audience })
+    apiObj.name = name
     console.log("Created API:", name)
   } catch {
     console.log("Error creating API:", name)
     return
   }
 
-  const { id } = apiObj.api
-
-  // To add scope to your API
   // You will need a Kinde paid plan
-  /*
+  // To add scope to your API
   for (const s of scopes) {
     try {
-      await api.call("POST", `/apis/${id}/scopes`, { key: s })
-      console.log("Created scope:", s)
-    } catch {
+      await api.call("POST", `/apis/${apiObj.api.id}/scopes`, {
+        key: s,
+        description: s,
+      })
+      console.log(`Created scope "${s}" to the API ${apiObj.name}`)
+    } catch (error) {
       console.log("Error creating scope:", s)
     }
   }
-    */
 }
 
 async function createRoleAndPermissions(api, role) {
