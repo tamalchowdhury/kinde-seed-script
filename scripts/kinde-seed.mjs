@@ -7,7 +7,7 @@ const {
   KINDE_CLIENT_SECRET,
   KINDE_AUDIENCE,
   KINDE_SCOPES,
-  CONFIG_PATH = "./config/prod.json",
+  CONFIG_PATH,
 } = process.env
 
 if (
@@ -27,7 +27,7 @@ async function getToken() {
     client_id: KINDE_CLIENT_ID,
     client_secret: KINDE_CLIENT_SECRET,
     audience: KINDE_AUDIENCE,
-    scope: KINDE_SCOPES, // space-separated
+    scope: KINDE_SCOPES,
   })
 
   const res = await fetch(`https://${KINDE_DOMAIN}/oauth2/token`, {
@@ -38,7 +38,7 @@ async function getToken() {
 
   if (!res.ok) {
     const text = await res.text() // <-- see why it failed
-    throw new Error(`Token error ${res.status}`)
+    throw new Error(`Token error ${res.status}, ${text}`)
   }
   const json = await res.json()
   return json.access_token
@@ -62,6 +62,49 @@ function client(token) {
     return res.status === 204 ? null : res.json()
   }
   return { call }
+}
+
+// Creates a Kinde application
+async function createApplicationWithUrls(
+  api,
+  name,
+  type,
+  redirects = [],
+  logouts = []
+) {
+  const errors = []
+  let appObj = {}
+
+  try {
+    appObj = await api.call("POST", "/applications", {
+      name,
+      type,
+    })
+  } catch (error) {
+    console.log("Cannot create an application, exiting the function")
+    return
+  }
+
+  const { id } = appObj.application
+
+  try {
+    await api.call("POST", `/applications/${id}/auth_redirect_urls`, {
+      urls: redirects,
+    })
+  } catch (error) {
+    errors.push("Cannot create redirect urls")
+  }
+
+  try {
+    await api.call("POST", `/applications/${id}/auth_logout_urls`, {
+      urls: logouts,
+    })
+  } catch (error) {
+    errors.push("Cannot create logout urls")
+  }
+
+  console.log("Created a Kinde application with id", id)
+  if (errors.length) console.log("with some errors", errors)
 }
 
 // ---- Ensure helpers (shape them to the Management API you have) ----
@@ -110,29 +153,6 @@ async function createRoleAndPermissions(api, role) {
   console.log("Created the roles and permissions")
 }
 
-async function createApplication(
-  api,
-  name,
-  type,
-  redirects = [],
-  logouts = []
-) {
-  const appObj = await api.call("POST", "/applications", {
-    name,
-    type,
-  })
-  const { id } = appObj.application
-
-  await api.call("POST", `/applications/${id}/auth_redirect_urls`, {
-    urls: redirects,
-  })
-  await api.call("POST", `/applications/${id}/auth_logout_urls`, {
-    urls: logouts,
-  })
-
-  console.log("Created application with id", id)
-}
-
 async function createEnvVars(api, items) {
   // need some work to do here
   try {
@@ -168,7 +188,7 @@ const api = client(token)
 // ])
 
 // await Promise.all([
-//   createApplication(
+//   createApplicationWithUrls(
 //     api,
 //     cfg.application.name,
 //     cfg.application.type,
@@ -183,7 +203,7 @@ const api = client(token)
 
 // Test and nail each endpoint one at a time.
 await Promise.all([
-  ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
+  
 ])
 
 console.log("Kinde seed complete")
