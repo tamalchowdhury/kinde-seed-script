@@ -121,12 +121,12 @@ async function createEnvVariable(api, item) {
   }
 }
 
-// ---- Ensure helpers (shape them to the Management API you have) ----
 async function createFeatureFlag(api, flag) {
   try {
     await api.call("POST", `/feature_flags`, flag)
-  } catch (err) {
-    console.log("Feature flags came with an error", err)
+    console.log("Created feature flag:", flag.name)
+  } catch {
+    console.log("Could not create feature flag:", flag.name)
   }
 }
 
@@ -201,7 +201,7 @@ const api = client(token)
 
 // Test and nail each endpoint one at a time.
 await Promise.all([
-  ...(cfg.envVars ?? []).map((v) => createEnvVariable(api, v)),
+  ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
 ])
 
 console.log("Kinde seed complete")
