@@ -9,6 +9,7 @@
     {
       "key": "orders-api",
       "name": "Orders API",
+      "audience": "orders",
       "scopes": ["orders:read", "orders:write"]
     }
   ],

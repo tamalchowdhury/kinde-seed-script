@@ -72,6 +72,8 @@ async function createApplicationWithUrls(
   redirects = [],
   logouts = []
 ) {
+  console.log("Creating application...")
+
   const errors = []
   let appObj = {}
 
@@ -87,6 +89,8 @@ async function createApplicationWithUrls(
 
   const { id } = appObj.application
 
+  console.log("Creating auth redirect URLs...")
+
   try {
     await api.call("POST", `/applications/${id}/auth_redirect_urls`, {
       urls: redirects,
@@ -94,6 +98,8 @@ async function createApplicationWithUrls(
   } catch (error) {
     errors.push("Cannot create redirect urls")
   }
+
+  console.log("Creating auth logout URLs...")
 
   try {
     await api.call("POST", `/applications/${id}/auth_logout_urls`, {
@@ -108,6 +114,8 @@ async function createApplicationWithUrls(
 }
 
 async function createEnvVariable(api, item) {
+  console.log("Creating envioronment variable...")
+
   try {
     const { key, value, sensitive = false } = item
     await api.call("POST", `/environment_variables`, {
@@ -130,15 +138,33 @@ async function createFeatureFlag(api, flag) {
   }
 }
 
-async function createApiAndScopes(api, { key, name, scopes = [] }) {
+async function createApiAndScopes(api, { name, audience, scopes = [] }) {
+  console.log("Creating API and Scopes...")
+
+  let apiObj = {}
+
   try {
-    await api.call("POST", `/apis`, { key, name })
-  } catch {}
+    apiObj = await api.call("POST", `/apis`, { name, audience })
+    console.log("Created API:", name)
+  } catch {
+    console.log("Error creating API:", name)
+    return
+  }
+
+  const { id } = apiObj.api
+
+  // To add scope to your API
+  // You will need a Kinde paid plan
+  /*
   for (const s of scopes) {
     try {
-      await api.call("POST", `/apis/${key}/scopes`, { key: s, name: s })
-    } catch {}
+      await api.call("POST", `/apis/${id}/scopes`, { key: s })
+      console.log("Created scope:", s)
+    } catch {
+      console.log("Error creating scope:", s)
+    }
   }
+    */
 }
 
 async function createRoleAndPermissions(api, role) {
@@ -200,8 +226,6 @@ const api = client(token)
 // ])
 
 // Test and nail each endpoint one at a time.
-await Promise.all([
-  ...(cfg.featureFlags ?? []).map((f) => createFeatureFlag(api, f)),
-])
+await Promise.all([...(cfg.apis ?? []).map((a) => createApiAndScopes(api, a))])
 
 console.log("Kinde seed complete")
