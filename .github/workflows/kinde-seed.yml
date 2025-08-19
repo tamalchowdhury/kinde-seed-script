@@ -1,0 +1,37 @@
+name: Kinde Seed Automation
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Which Kinde env to seed"
+        required: true
+        type: choice
+        options: [dev, staging, prod]
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node ./scripts/kinde-seed.mjs
+        env:
+          KINDE_ENV: ${{ inputs.environment }}
+          KINDE_DOMAIN: ${{ secrets.KINDE_DOMAIN }} # e.g. subdomain.region.kinde.com
+          KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
+          KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
+          KINDE_AUDIENCE: ${{ secrets.KINDE_AUDIENCE }} # management API audience
+          # Keep scopes least-privilege. Add only what you need.
+          KINDE_SCOPES: >-
+            create:applications 
+            create:application_redirect_uris 
+            create:application_logout_uris 
+            create:environment_variables 
+            create:feature_flags 
+            create:apis create:api_scopes 
+            create:roles create:permissions 
+            update:role_permissions
+          CONFIG_PATH: ./config/${{ inputs.environment }}.json
