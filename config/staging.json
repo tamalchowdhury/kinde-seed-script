@@ -1,0 +1,39 @@
+{
+  "application": {
+    "name": "My Kinde App, Created with Script",
+    "type": "reg",
+    "redirectUrls": ["http://localhost:3000/callback"],
+    "logoutUrls": ["http://localhost:3000/"]
+  },
+  "apis": [
+    {
+      "key": "orders-api",
+      "name": "Orders API",
+      "audience": "orders",
+      "scopes": ["orders:read", "orders:write"]
+    }
+  ],
+  "roles": [
+    {
+      "key": "admin",
+      "name": "Admin",
+      "permissions": [
+        { "key": "orders:read", "name": "Read Orders" },
+        { "key": "orders:write", "name": "Write Orders" }
+      ]
+    }
+  ],
+  "featureFlags": [
+    {
+      "name": "New Dashboard",
+      "key": "new_dashboard",
+      "type": "bool",
+      "allow_override_level": "env",
+      "default_value": true
+    }
+  ],
+  "envVars": [
+    { "key": "PAYMENTS_GATEWAY", "value": "sandbox", "sensitive": false },
+    { "key": "SECRET_PAYMENTS_GATEWAY", "value": "sandbox", "sensitive": true }
+  ]
+}

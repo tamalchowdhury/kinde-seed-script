@@ -63,7 +63,8 @@ function client(token) {
   return { call }
 }
 
-// Creates a Kinde application
+// Helper functions
+
 async function createApplicationWithUrls(
   api,
   name,
@@ -153,17 +154,19 @@ async function createApiAndScopes(api, { name, audience, scopes = [] }) {
 
   // You will need a Kinde paid plan
   // To add scope to your API
-  for (const s of scopes) {
-    try {
-      await api.call("POST", `/apis/${apiObj.api.id}/scopes`, {
-        key: s,
-        description: s,
-      })
-      console.log(`Created scope "${s}" to the API ${apiObj.name}`)
-    } catch (error) {
-      console.log("Error creating scope:", s)
-    }
-  }
+
+  // Un-comment this block to use it:
+  // for (const s of scopes) {
+  //   try {
+  //     await api.call("POST", `/apis/${apiObj.api.id}/scopes`, {
+  //       key: s,
+  //       description: s,
+  //     })
+  //     console.log(`Created scope "${s}" to the API ${apiObj.name}`)
+  //   } catch (error) {
+  //     console.log("Error creating scope:", s)
+  //   }
+  // }
 }
 
 async function createRoleAndPermissions(api, role) {
@@ -234,4 +237,4 @@ await Promise.all([
   ...(roles ?? []).map((r) => createRoleAndPermissions(api, r)),
 ])
 
-console.log("Kinde seed complete")
+console.log("Kinde Seed Complete")
