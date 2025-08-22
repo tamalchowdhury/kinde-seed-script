@@ -1,0 +1,7 @@
+export KINDE_DOMAIN=<YOUR_KINDE_DOMAIN>.kinde.com
+export KINDE_CLIENT_ID=<KINDE_CLIENT_ID>
+export KINDE_CLIENT_SECRET=<KINDE_CLIENT_SECRET>
+export KINDE_AUDIENCE=https://<YOUR_KINDE_DOMAIN>.kinde.com/api
+export KINDE_SCOPES="create:applications create:application_redirect_uris create:application_logout_uris create:environment_variables create:feature_flags create:apis create:api_scopes create:roles create:permissions update:role_permissions"
+export CONFIG_PATH=./config/dev.json
+
